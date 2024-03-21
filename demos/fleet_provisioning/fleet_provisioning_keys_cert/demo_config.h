@@ -70,6 +70,12 @@
  */
 #define AWS_MQTT_PORT    ( 8883 )
 
+#define AWS_IOT_ENDPOINT                "a1tdvh7gznuyl9-ats.iot.ap-southeast-2.amazonaws.com"
+#define ROOT_CA_CERT_PATH               "claim_certs/RootCA.pem"
+#define CLAIM_CERT_PATH                 "claim_certs/device_certificate.pem.crt"
+#define CLAIM_PRIVATE_KEY_PATH          "claim_certs/priv-key.pem.key"
+#define PROVISIONING_TEMPLATE_NAME      "thingy91_claim_template2"
+#define DEVICE_SERIAL_NUMBER            "thingy91_sim"
 /**
  * @brief Path of the file containing the server's root CA certificate.
  *

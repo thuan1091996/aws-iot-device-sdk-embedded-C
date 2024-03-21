@@ -1,4 +1,7 @@
 set( DEMO_NAME "fleet_provisioning_keys_cert_demo" )
+# Extract compile_commands.json
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
 
 # Include MQTT library's source and header path variables.
 include( ${CMAKE_SOURCE_DIR}/libraries/standard/coreMQTT/mqttFilePaths.cmake )

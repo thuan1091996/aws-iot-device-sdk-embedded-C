@@ -242,7 +242,10 @@ static void provisioningPublishCallback( MQTTPublishInfo_t * pPublishInfo,
 
     status = FleetProvisioning_MatchTopic( pPublishInfo->pTopicName,
                                            pPublishInfo->topicNameLength, &api );
-
+    LogError(("\n\n============================= START ========================================\n"));
+    LogError(("Received message on topic. Topic: %.*s.\n", ( int ) pPublishInfo->topicNameLength, ( const char * ) pPublishInfo->pTopicName ));
+    LogError(("Received message: %.*s.\n", ( int ) pPublishInfo->payloadLength, ( const char * ) pPublishInfo->pPayload ));
+    LogError(("\n================================ END =========================================\n\n"));
     if( status != FleetProvisioningSuccess )
     {
         LogWarn( ( "Unexpected publish message received. Topic: %.*s.",
@@ -342,29 +345,44 @@ static bool subscribeToKeysCertResponseTopics( void )
 {
     bool status;
 
-    status = SubscribeToTopic( FP_CBOR_CREATE_KEYS_ACCEPTED_TOPIC,
-                               FP_CBOR_CREATE_KEYS_ACCEPTED_LENGTH );
+    // status = SubscribeToTopic( FP_CBOR_CREATE_KEYS_ACCEPTED_TOPIC,
+    //                            FP_CBOR_CREATE_KEYS_ACCEPTED_LENGTH );
+    status = SubscribeToTopic("uplink/thingy91_sim/accepted", strlen("uplink/thingy91_sim/accepted"));
 
     if( status == false )
     {
-        LogError( ( "Failed to subscribe to fleet provisioning topic: %.*s.",
-                    FP_CBOR_CREATE_KEYS_ACCEPTED_LENGTH,
-                    FP_CBOR_CREATE_KEYS_ACCEPTED_TOPIC ) );
+        // LogError( ( "Failed to subscribe to fleet provisioning topic: %.*s.",
+        //             FP_CBOR_CREATE_KEYS_ACCEPTED_LENGTH,
+        //             FP_CBOR_CREATE_KEYS_ACCEPTED_TOPIC ) );
+        LogError( ( "Failed to subscribe to fleet provisioning topic: %s.",
+                    "uplink/thingy91_sim/accepted" ) );
     }
 
     if( status == true )
     {
-        status = SubscribeToTopic( FP_CBOR_CREATE_KEYS_REJECTED_TOPIC,
-                                   FP_CBOR_CREATE_KEYS_REJECTED_LENGTH );
-
+        // status = SubscribeToTopic( FP_CBOR_CREATE_KEYS_REJECTED_TOPIC,
+        //                            FP_CBOR_CREATE_KEYS_REJECTED_LENGTH );
+        // 
+        // if( status == false )
+        // {
+        //     LogError( ( "Failed to subscribe to fleet provisioning topic: %.*s.",
+        //                 FP_CBOR_CREATE_KEYS_REJECTED_LENGTH,
+        //                 FP_CBOR_CREATE_KEYS_REJECTED_TOPIC ) );
+        // }
+        LogError( ( "Completed to subscribe to fleet provisioning topic: %s.",
+                    "uplink/thingy91_sim/accepted" ) );
+        status = SubscribeToTopic("uplink/thingy91_sim/rejected", strlen("uplink/thingy91_sim/rejected"));
         if( status == false )
         {
-            LogError( ( "Failed to subscribe to fleet provisioning topic: %.*s.",
-                        FP_CBOR_CREATE_KEYS_REJECTED_LENGTH,
-                        FP_CBOR_CREATE_KEYS_REJECTED_TOPIC ) );
+            LogError( ( "Failed to subscribe to fleet provisioning topic: %s.",
+                        "uplink/thingy91_sim/rejected" ) );
+        }
+        else
+        {
+            LogError( ( "Completed to subscribe to fleet provisioning topic: %s.",
+                        "uplink/thingy91_sim/rejected" ) );
         }
     }
-
     return status;
 }
 /*-----------------------------------------------------------*/
@@ -490,6 +508,12 @@ int main( int argc,
     /* Silence compiler warnings about unused variables. */
     ( void ) argc;
     ( void ) argv;
+    
+    LogError(("\n\n============================= INFO START ========================================\n"));
+    LogError(("AWS_IOT_ENDPOINT: %s", AWS_IOT_ENDPOINT));
+    LogError(("CLAIM_CERT_PATH: %s", CLAIM_CERT_PATH));
+    LogError(("\n================================ INFO END =========================================\n\n"));
+
 
     do
     {
@@ -555,6 +579,7 @@ int main( int argc,
 
         /* We use the CreateKeysAndCertificate API to obtain a client certificate
          * and private key. */
+        #define DEVICE_ID               "thingy91_sim"
         if( status == true )
         {
             /* Subscribe to the CreateKeysAndCertificate accepted and rejected
@@ -566,16 +591,27 @@ int main( int argc,
         if( status == true )
         {
             /* Publish an empty payload to the CreateKeysAndCertificate API. */
-            status = PublishToTopic( FP_CBOR_CREATE_KEYS_PUBLISH_TOPIC,
-                                     FP_CBOR_CREATE_KEYS_PUBLISH_LENGTH,
+            // status = PublishToTopic( FP_CBOR_CREATE_KEYS_PUBLISH_TOPIC,
+            //                          FP_CBOR_CREATE_KEYS_PUBLISH_LENGTH,
+            //                          "",
+            //                          0 );
+            // LogError(("Publish to topic: %.*s", FP_CBOR_CREATE_KEYS_PUBLISH_LENGTH, FP_CBOR_CREATE_KEYS_PUBLISH_TOPIC));
+            // if( status == false )
+            // {
+            //     LogError( ( "Failed to publish to fleet provisioning topic: %.*s.",
+            //                 FP_CBOR_CREATE_KEYS_PUBLISH_LENGTH,
+            //                 FP_CBOR_CREATE_KEYS_PUBLISH_TOPIC ) );
+            // }
+            // Publish to topic: uplink/thingy91_sim/json
+            status = PublishToTopic( "uplink/thingy91_sim/json",
+                                     strlen("uplink/thingy91_sim/json"),
                                      "",
                                      0 );
-
+            LogError(("Publish to topic: %s", "uplink/thingy91_sim/json"));
             if( status == false )
             {
-                LogError( ( "Failed to publish to fleet provisioning topic: %.*s.",
-                            FP_CBOR_CREATE_KEYS_PUBLISH_LENGTH,
-                            FP_CBOR_CREATE_KEYS_PUBLISH_TOPIC ) );
+                LogError( ( "Failed to publish to fleet provisioning topic: %s.",
+                            "uplink/thingy91_sim/json" ) );
             }
         }
 
@@ -660,7 +696,7 @@ int main( int argc,
                                      FP_CBOR_REGISTER_PUBLISH_LENGTH( PROVISIONING_TEMPLATE_NAME_LENGTH ),
                                      ( char * ) payloadBuffer,
                                      payloadLength );
-
+            LogInfo(("Publish to topic: %.*s", FP_CBOR_REGISTER_PUBLISH_LENGTH( PROVISIONING_TEMPLATE_NAME_LENGTH ), FP_CBOR_REGISTER_PUBLISH_TOPIC( PROVISIONING_TEMPLATE_NAME )));
             if( status == false )
             {
                 LogError( ( "Failed to publish to fleet provisioning topic: %.*s.",
